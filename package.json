@@ -1,6 +1,6 @@
 {
   "name": "solar-death-time",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A timestamp format counting negative milliseconds down to the death of the Sun (5,000,000,000 CE), interoperable with Date and Temporal.",
   "type": "module",
   "main": "./dist/index.js",
