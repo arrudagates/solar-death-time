@@ -1,0 +1,146 @@
+<title>Solar Death Time</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: one narrow instrument column. A live readout up top, a converter panel below, the definition at the foot. */
+  :root {
+    --bg: #eceef2;
+    --panel: #f8f9fb;
+    --fg: #15171d;
+    --muted: #5b6070;
+    --line: #d3d7df;
+    --sun: #c2410c;
+    --sun-soft: #fbe3d4;
+    --error: #b42318;
+    --font-display: "Unbounded", "Arial Black", system-ui, sans-serif;
+    --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b0c10; --panel: #14161c; --fg: #ecebe7; --muted: #9a9ead; --line: #2a2d36;
+      --sun: #ff8a3d; --sun-soft: #3a1f10; --error: #ff7a6b; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b0c10; --panel: #14161c; --fg: #ecebe7; --muted: #9a9ead; --line: #2a2d36;
+    --sun: #ff8a3d; --sun-soft: #3a1f10; --error: #ff7a6b; color-scheme: dark;
+  }
+
+  body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 1rem; line-height: 1.55; }
+  .wrap { max-width: 52rem; margin: 0 auto; padding-inline: 1.25rem; padding-block: 2.5rem 3rem; display: grid; gap: 2.5rem; }
+
+  header { display: grid; gap: .5rem; }
+  .eyebrow { font-size: .75rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.6rem, 4.5vw, 2.4rem); line-height: 1.1; margin: 0; text-wrap: balance; }
+  h1 .sun { color: var(--sun); }
+  .lede { margin: 0; color: var(--muted); max-width: 62ch; }
+
+  .readout { display: grid; gap: 1rem; border-top: 2px solid var(--fg); padding-top: 1.25rem; }
+  .readout-label { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .live-dot { display: inline-flex; align-items: center; gap: .45rem; color: var(--sun); }
+  .live-dot::before { content: ""; width: .5rem; height: .5rem; border-radius: 50%; background: var(--sun); animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .25; } }
+  .big {
+    font-family: var(--font-mono); font-weight: 500; font-variant-numeric: tabular-nums;
+    font-size: min(2.75rem, calc((100vw - 2.5rem) / 17.8)); line-height: 1.15; letter-spacing: -.01em;
+    min-width: 0;
+  }
+  .big .num { white-space: nowrap; }
+  .big .unit { color: var(--sun); font-size: .5em; white-space: nowrap; letter-spacing: .08em; }
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem 2rem; margin: 0; }
+  .facts div { min-width: 0; }
+  .facts dt { font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .facts dd { margin: .15rem 0 0; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: .95rem; overflow-wrap: anywhere; }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 1.5rem; display: grid; gap: 1.25rem; }
+  h2 { font-family: var(--font-display); font-weight: 500; font-size: 1.15rem; margin: 0; }
+  .panel > p { margin: 0; color: var(--muted); font-size: .92rem; }
+  .converter { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: start; }
+  .field { display: grid; gap: .4rem; min-width: 0; }
+  .field-head { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; flex-wrap: wrap; }
+  label { font-weight: 600; font-size: .9rem; }
+  select, input, button { font: inherit; color: inherit; }
+  select { font-size: .8rem; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: .15rem .35rem; }
+  input[type="text"] {
+    width: 100%; box-sizing: border-box; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: .95rem;
+    background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: .65rem .75rem;
+  }
+  input[type="text"][aria-invalid="true"] { border-color: var(--error); }
+  :focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
+  .hint { font-size: .82rem; color: var(--muted); font-family: var(--font-mono); overflow-wrap: anywhere; min-height: 1.3em; }
+  .hint.error { color: var(--error); font-family: var(--font-body); }
+  .swap { align-self: center; margin-top: 1.4rem; color: var(--sun); font-size: 1.3rem; line-height: 1; }
+  .actions { display: flex; gap: .75rem; flex-wrap: wrap; }
+  button {
+    cursor: pointer; border: 1px solid var(--line); background: var(--bg); border-radius: 4px; padding: .45rem .9rem; font-size: .88rem; font-weight: 500;
+  }
+  button:hover { border-color: var(--sun); }
+  button.primary { background: var(--sun); color: var(--panel); border-color: var(--sun); }
+  button.primary:hover { filter: brightness(1.08); }
+
+  footer { color: var(--muted); font-size: .88rem; display: grid; gap: .5rem; border-top: 1px solid var(--line); padding-top: 1.25rem; }
+  footer p { margin: 0; max-width: 68ch; }
+  code { font-family: var(--font-mono); font-size: .92em; background: var(--sun-soft); padding: .05em .3em; border-radius: 3px; overflow-wrap: anywhere; }
+
+  @media (max-width: 40rem) {
+    .converter { grid-template-columns: 1fr; }
+    .swap { margin: 0; transform: rotate(90deg); justify-self: center; }
+  }
+  @media (prefers-reduced-motion: reduce) { .live-dot::before { animation: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Timestamp format · solar-death-time</div>
+    <h1>Milliseconds until the <span class="sun">Sun</span> dies</h1>
+    <p class="lede">Solar Death Time counts every instant as a negative number of milliseconds, ticking up towards zero at 1 January 5,000,000,000 CE, 00:00 UTC.</p>
+  </header>
+
+  <section class="readout" aria-labelledby="now-label">
+    <div class="readout-label"><span id="now-label">Solar Death Time, now</span><span class="live-dot">Live</span></div>
+    <div class="big" aria-live="off"><span class="num" id="now-sdt">-157,784,696,041,785,913,712</span> <span class="unit">SDT</span></div>
+    <dl class="facts">
+      <div><dt>Date (UTC)</dt><dd id="now-iso">2026-10-03T02:40:00.000Z</dd></div>
+      <div><dt>Your local time</dt><dd id="now-local">Sat, Oct 3, 2026, 2:40:00 AM</dd></div>
+      <div><dt>Unix time (ms)</dt><dd id="now-unix">1790994886288</dd></div>
+      <div><dt>Years remaining</dt><dd id="now-years">4,999,997,973.25</dd></div>
+    </dl>
+  </section>
+
+  <section class="panel" aria-labelledby="conv-title">
+    <h2 id="conv-title">Convert</h2>
+    <p>Type in either field and the other one updates. Both are whole numbers; SDT accepts an optional <code>SDT</code> suffix and digit commas.</p>
+    <div class="converter">
+      <div class="field">
+        <div class="field-head">
+          <label for="unix-input">Unix time</label>
+          <select id="unix-unit" aria-label="Unix time unit">
+            <option value="ms" selected>milliseconds</option>
+            <option value="s">seconds</option>
+          </select>
+        </div>
+        <input type="text" id="unix-input" inputmode="numeric" autocomplete="off" spellcheck="false" value="0">
+        <div class="hint" id="unix-hint">1970-01-01T00:00:00.000Z</div>
+      </div>
+      <div class="swap" aria-hidden="true">⇄</div>
+      <div class="field">
+        <div class="field-head"><label for="sdt-input">Solar Death Time</label></div>
+        <input type="text" id="sdt-input" inputmode="numeric" autocomplete="off" spellcheck="false" value="-157784697832780800000">
+        <div class="hint" id="sdt-hint">-157,784,697,832,780,800,000 SDT</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="button" class="primary" id="use-now">Use current time</button>
+      <button type="button" id="use-epoch">Unix epoch</button>
+      <button type="button" id="use-death">Death of the Sun</button>
+      <button type="button" id="copy-sdt">Copy SDT</button>
+    </div>
+  </section>
+
+  <footer>
+    <p>SDT zero is <code>5000000000-01-01T00:00:00.000Z</code> on the proleptic Gregorian calendar, which is <code>157,784,697,832,780,800,000</code> ms after the Unix epoch. An SDT value is <code>-x</code>, where <code>x</code> is the milliseconds left until then.</p>
+    <p>JavaScript dates only reach the years −271,821 to 275,760, so SDT values outside that range convert to Unix time but have no calendar date here. Leap seconds are ignored, as in <code>Date</code>.</p>
+  </footer>
+</div>

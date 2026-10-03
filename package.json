@@ -1,0 +1,50 @@
+{
+  "name": "solar-death-time",
+  "version": "0.1.0",
+  "description": "A timestamp format counting negative milliseconds down to the death of the Sun (5,000,000,000 CE), interoperable with Date and Temporal.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "demo": "node demo/build.mjs"
+  },
+  "keywords": [
+    "time",
+    "timestamp",
+    "date",
+    "temporal",
+    "sun",
+    "bigint"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@js-temporal/polyfill": "^0.5.1",
+    "esbuild": "^0.21.5",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  },
+  "homepage": "https://arrudagates.github.io/solar-death-time/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arrudagates/solar-death-time.git"
+  },
+  "bugs": {
+    "url": "https://github.com/arrudagates/solar-death-time/issues"
+  }
+}
