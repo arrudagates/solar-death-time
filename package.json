@@ -19,7 +19,8 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "demo": "node demo/build.mjs"
+    "demo": "node demo/build.mjs",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
   },
   "keywords": [
     "time",
@@ -46,5 +47,8 @@
   },
   "bugs": {
     "url": "https://github.com/arrudagates/solar-death-time/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
